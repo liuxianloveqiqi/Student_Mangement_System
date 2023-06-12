@@ -22,17 +22,16 @@ typedef struct node{
 //函数声明
 void Menu(void);
 Link AddStudents(Link);
+Link QuickSort(Link pHead, Link pEnd);
 Link SortId(Link);
 Link SearchName(Link, char*);
-Link SearchId(Link, int);
 void PrintData(Link);
 void Modify(Link, char*);
-void DelName(Link, char*);
-void DelId(Link, int);
+void DeleteName(Link, char*);
 void Count(Link);
 void ValidateId(Link, Link);
 int IsIdRepeat(int, Link);
-void Validate(Link, char);
+void ValidateGrade(Link, char);
 void Save(Link);
 
 
@@ -40,16 +39,17 @@ void Save(Link);
 //创建用户提示菜单
 void Menu(void)
 {
-    printf("*****************************************\n");
-    printf("*          学生成绩管理系统                *\n");
-    printf("*                                       *\n");
-    printf("*    1. 输入学生信息        2. 查询学生信息 *\n");
-    printf("*                                       *\n");
-    printf("*    3. 输出学生信息        4. 更新学生信息 *\n");
-    printf("*                                       *\n");
-    printf("*    5. 统计学生信息        6. 退出系统     *\n");
-    printf("*                                       *\n");
-    printf("*****************************************\n");
+    printf("********************************************\n");
+    printf("*          学生成绩管理系统                   *\n");
+    printf("*                                          *\n");
+    printf("*    1. 输入学生信息        2. 查询学生信息    *\n");
+    printf("*                                          *\n");
+    printf("*    3. 输出学生信息        4. 更新学生信息    *\n");
+    printf("*                                          *\n");
+    printf("*    5. 统计学生信息        6. 删除学生信息    *\n");
+    printf("*                                          *\n");
+    printf("*    7. 退出系统                            *\n");
+    printf("********************************************\n");
 }
 
 
@@ -67,12 +67,14 @@ Link AddStudents(Link pHead)
     printf("学号：");
     ValidateId(s, pHead);
     printf("高数成绩：");
-    Validate(s, 'm');
+    ValidateGrade(s, 'm');
     printf("大英成绩：");
-    Validate(s, 'e');
+    ValidateGrade(s, 'e');
     printf("c语言成绩：");
-    Validate(s, 'c');
+    ValidateGrade(s, 'c');
     s->data.total = s->data.cGrade + s->data.englishGrade + s->data.mathGrade;
+    s->next=pHead->next;
+    pHead->next=s;
     printf("\n输入成功。\n");
     return s;
 }
@@ -105,8 +107,8 @@ int IsIdRepeat(int id, Link pHead)
     return i;
 }
 
-//修改\验证成绩
-void Validate(Link s, char x)
+//校验成绩
+void ValidateGrade(Link s, char x)
 {
     int g, flag=1;
     while(flag){
@@ -116,7 +118,7 @@ void Validate(Link s, char x)
                 case 'e': s->data.englishGrade = g; break;
                 case 'c': s->data.cGrade = g; break;
             }
-            s->data.total =  s->data.total = s->data.cGrade + s->data.englishGrade + s->data.mathGrade;
+            s->data.total = s->data.cGrade + s->data.englishGrade + s->data.mathGrade;
             flag = 0;
         }
         else printf("您输入的成绩有误，请输入正确的成绩:");
@@ -125,6 +127,7 @@ void Validate(Link s, char x)
 
 // 快速排序链表节点
 Link QuickSort(Link pHead, Link pEnd) {
+    // 如果传入的链表为空或只有一个节点，则直接返回该链表，不需要进行排序操作
     if (pHead == pEnd || pHead->next == pEnd)
         return pHead;
 
@@ -133,7 +136,9 @@ Link QuickSort(Link pHead, Link pEnd) {
 
     // 将小于基准值的节点放在基准值的左侧
     while (p != pEnd) {
+        // 如果当前节点的id值小于头节点的id值，则表示该节点的id值需要放在基准值（头节点）的左侧
         if (p->data.id < pHead->data.id) {
+            // 将指针q指向下一个节点，用于指向下一个小于基准值的位置
             q = q->next;
 
             // 交换节点数据
@@ -179,22 +184,7 @@ Link SearchName(Link pHead,char* name)
     }
 }
 
-//查询学生信息（通过学号）
-Link SearchId(Link pHead, int id)
-{
-    Link s = pHead->next;
-    while( (s != NULL) && (s->data.id != id))
-        s = s->next;
-    if(s == NULL){
-        printf("\n你所查询的学号不存在。\n");
-        return NULL;
-    }
-    else{
-        printf("\n结果如下：\n\n%d    %s\t高数成绩：%d\t大英成绩：%d\tC语言成绩：%d\t总分：%d\n",
-               s->data.id, s->data.name, s->data.mathGrade, s->data.englishGrade, s->data.cGrade,s->data.total);
-        return s;
-    }
-}
+
 
 //输出学生信息
 void PrintData(Link pHead)
@@ -234,17 +224,17 @@ void Modify(Link pHead,char *name)
             }break;
             case 1:{
                 printf("请输入更改后的成绩:");
-                Validate(q, 'm');
+                ValidateGrade(q, 'm');
                 printf("\n修改成功！\n\n");
             }break;
             case 2:{
                 printf("请输入更改后的成绩:");
-                Validate(q, 'e');
+                ValidateGrade(q, 'e');
                 printf("\n修改成功！\n\n");
             }break;
             case 3:{
                 printf("请输入更改后的成绩:");
-                Validate(q, 'c');
+                ValidateGrade(q, 'c');
                 printf("\n修改成功！\n\n");
             }break;
             default: printf("请输入正确的操作。");break;
@@ -253,7 +243,7 @@ void Modify(Link pHead,char *name)
 }
 
 //删除学生信息（通过名字）
-void DelName(Link pHead,char* name)
+void DeleteName(Link pHead,char* name)
 {
     Link p = pHead;
     Link q = pHead->next;
@@ -271,23 +261,7 @@ void DelName(Link pHead,char* name)
     }
 }
 
-//删除学生信息（通过学号）
-void DelId(Link pHead,int id)
-{
-    Link p = pHead;
-    Link q = pHead->next;
-    while((q != NULL) && q->data.id != id )
-    {
-        q = q->next;
-        p = p->next;
-    }
-    if(q == NULL)
-        printf("\n您所希望删除的姓名不存在\n");
-    else{
-        p->next = q->next;
-        printf("\n删除完毕!\n");
-    }
-}
+
 
 //统计学生信息
 void Count(Link pHead)
@@ -363,31 +337,28 @@ void Count(Link pHead)
 }
 
 //保存至文件
-void Save(Link pHead)
-{
+void Save(Link pHead) {
+    // 声明一个文件指针fp，用于打开和操作文件。
     FILE *fp;
+
     Link p;
 
-    if((fp=fopen("/Users/liuxian/CProjects/school/Student-Mangement-System/students_message.txt","w+"))==NULL)
-    {
-        printf("Cannot open the file.\n");
+    if ((fp = fopen("/Users/liuxian/CProjects/school/Student-Mangement-System/students_message.txt", "w+")) == NULL) {
+        printf("打开文件失败！\n");
         return;
     }
 
     p = pHead->next;
-    while(p)
-    {
-        if(p == pHead->next)
-            fprintf(fp,"%d      %s    %d    %d    %d    %d\n",
-                    p->data.id,p->data.name,p->data.mathGrade,p->data.englishGrade,p->data.cGrade,p->data.total);
-        else
-            fprintf(fp,"%d      %s    %d    %d    %d    %d\n",
-                    p->data.id,p->data.name,p->data.mathGrade,p->data.englishGrade,p->data.cGrade,p->data.total);
+    while (p) {
+        fprintf(fp, "%d\t%s\t数学成绩：%d\t英语成绩：%d\tC语言成绩：%d\t总分：%d\n",
+                p->data.id, p->data.name, p->data.mathGrade, p->data.englishGrade, p->data.cGrade, p->data.total);
         p = p->next;
     }
 
     fclose(fp);
 }
+
+
 
 
 int main()
@@ -407,6 +378,7 @@ int main()
         switch (choice) {
             case 1:
                 pHead->next = AddStudents(pHead);
+                SortId(pHead);
                 break;
             case 2:
                 printf("请输入要查询的学生姓名：");
@@ -425,6 +397,11 @@ int main()
                 Count(pHead);
                 break;
             case 6:
+                printf("请输入要删除的学生姓名：");
+                scanf("%s", name);
+                DeleteName(pHead,name);
+                break;
+            case 7:
                 printf("退出系统。\n");
                 break;
             default:
@@ -432,7 +409,7 @@ int main()
                 break;
         }
 
-    } while (choice != 6);
+    } while (choice != 7);
 
     // 保存数据到文件
     Save(pHead);
